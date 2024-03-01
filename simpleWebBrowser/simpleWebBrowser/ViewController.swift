@@ -21,7 +21,6 @@ class ViewController: UIViewController, WKNavigationDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Browse", style: .plain, target: self, action: #selector(browseTapped))
-        
         // MARK: - Progress bar
         progressView = UIProgressView(progressViewStyle: .default)
         progressView.sizeToFit()
@@ -31,7 +30,7 @@ class ViewController: UIViewController, WKNavigationDelegate {
         let refresh = UIBarButtonItem(barButtonSystemItem: .refresh, target: webView, action: #selector(webView.reload))
         
         toolbarItems = [progressButton, spacer, refresh]
-        navigationController?.isToolbarHidden = false
+        navigationController?.isToolbarHidden = true
         
         
         // MARK: - URL load
@@ -45,17 +44,26 @@ class ViewController: UIViewController, WKNavigationDelegate {
     
     // MARK: - Funcs
     @objc func browseTapped() {
-        let ac = UIAlertController(title: "Open page…", message: nil, preferredStyle: .actionSheet)
-        ac.addAction(UIAlertAction(title: "apple.com", style: .default, handler: openPage))
-        ac.addAction(UIAlertAction(title: "hackingwithswift.com", style: .default, handler: openPage))
-        ac.addAction(UIAlertAction(title: "google.com", style: .default, handler: openPage))
-        ac.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-        ac.popoverPresentationController?.barButtonItem = self.navigationItem.rightBarButtonItem
-        present(ac, animated: true)
+        let alertController = UIAlertController(title: "Do you want to...", message: nil, preferredStyle: .alert)
+
+        let browseAction = UIAlertAction(title: "Enter a site address", style: .default) { action in
+            let textField = alertController.textFields?.first
+            if let siteAddress = textField?.text {
+                self.openPage(siteAddress)
+            }
+        }
+        alertController.addTextField { _ in }
+        
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in }
+        
+        alertController.addAction(browseAction)
+        alertController.addAction(cancelAction)
+        
+        present(alertController, animated: true, completion: nil)
     }
     
-    @objc func openPage(action: UIAlertAction) {
-        let url = URL(string: "https://" + action.title!)!
+    @objc func openPage(_ siteAddress: String?) {
+        let url = URL(string: "https://" + siteAddress!)!
         webView.load(URLRequest(url: url))
         webView.allowsBackForwardNavigationGestures = true
     }
